@@ -1,0 +1,31 @@
+module adder (// adder module implements both ADD and SUB functions
+    input a[16],  //inputs a and b
+    input b[16],
+    input alufn[6], //
+    output out[16],
+    output z, // output z: zero
+    output v, // output v: overflow
+    output n // output n: negative
+  ) {  
+   
+  sig oput[16];
+                  
+  always {
+    case(alufn[0]) {
+      1b0:
+        oput = a + b;    // addition 
+      1b1:
+        oput = a - b;    // subtraction 
+   
+      default:
+        oput = 0;
+        }
+    
+    // calculating the outputs
+    n = oput[15];                                               
+    v = (a[15]&b[15]&(~oput[15]))|((~a[15])&(~b[15])&oput[15]);
+    z = ~|oput;
+    out = oput;
+    
+  }
+}
