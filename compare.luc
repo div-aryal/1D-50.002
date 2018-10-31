@@ -1,23 +1,23 @@
 module compare (
-   input alufn[6], //import from ALU
+   input alufn[6],
    input z,
    input v,
    input n,
-   output out[16]  //only using LSB bit output to ALU
+   output out //only using LSB bit
   ) {
 
   always {
-    out[15:1] = 0;
+    
 
     case(alufn[2:1]) {
     2b01:
-      out[0] = z;// a=b
+      out = z;// a=b
     2b10:
-      out[0] = n ^ v; // a<b
+      out = n ^ v; // a<b
     2b11:
-      out[0] = z | (n ^ v); // a<=b
+      out = z | (n ^ v); // a<=b
     default:
-      out[0] = 0; // default to 0
+      out = 0; 
     }
   }
 }
