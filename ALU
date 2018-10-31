@@ -1,0 +1,51 @@
+module alu (
+    input alufn[6],                 //input ALUFN 6bit OPCODES
+    input a[16], // input a 
+    input b[16], // input b
+
+    output alu[16],
+    output z,
+    output v,
+    output n
+  ) {
+
+  adder adder;                        //instantiation of ALU components
+  compare comp;
+  boolean boole;
+  shifter shift;
+  
+  
+  always {
+    adder.a = a;                      //assigning inputs to adder module
+    adder.b = b;
+    adder.alufn = alufn;
+    comp.v = adder.v;                 //assigning inputs to compare module
+    comp.n = adder.n;
+    comp.z = adder.z;
+    comp.alufn = alufn;
+    boole.a = a;                    //assigning inputs to boolean module
+    boole.b = b;
+    boole.alufn = alufn;
+    shift.a = a;                    //assigning inputs to shifter module
+    shift.b = b;
+    shift.alufn = alufn;
+    
+    case(alufn[5:4]){
+      b00:                          //if alufn[5:4] == 00, select adder output 
+        alu = adder.out; 
+      b01:                          //if alufn[5:4] == 01, select boolean output
+        alu = boole.out;
+      b10:                          //if alufn[5:4] == 10, select shifter output
+        alu = shift.out;
+      b11:                          //if alufn[5:4] == 11, select compare output
+        alu = comp.out;
+      default:
+        alu = 8b0;
+  }
+    
+    z = adder.z;                      // z, v, n outputs
+    v = adder.v;                      //   
+    n = adder.n;                      //
+
+  }
+}
