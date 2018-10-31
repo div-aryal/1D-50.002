@@ -293,7 +293,7 @@ state.d = state.OR;  //next state
             state.d = state.MOD;
         }
 
-      state.MOD:
+      state.MOD:// forced error 
         alu.alufn = 6b000011;  //OPCODE for MOD
         alu.a = 16b0000000000000010; // 2 in decimal
         alu.b = 16b0000000000000100;  // 4 in decimal
