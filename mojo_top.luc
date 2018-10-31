@@ -40,7 +40,8 @@ module mojo_top (
       fsm state = {IN_A,IN_B,OPERATION,RESULT,AUTO};
     }
   }
-  
+  //instantiate tester16
+  tester16 tester(.clk(clk), .rst(rst), .pause(io_dip[2][6]), .restarttest(io_button[1]));
   always {
     reset_cond.in = ~rst_n;   // input raw inverted reset signal
     rst = reset_cond.out;     // conditioned reset
@@ -95,7 +96,11 @@ module mojo_top (
         if  (io_button[0]==1&& state.q== state.RESULT){ // press the up button to switch to IN_A
         state.d = state.IN_A;}
       //state.AUTO:
-      
+        
+      if( io_dip[2][7] == 1){
+        state.d = state.AUTO;}
+      state.AUTO:
+      seg.values = tester.out;
     }
     }    
 }
