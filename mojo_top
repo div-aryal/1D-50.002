@@ -1,0 +1,101 @@
+module mojo_top (
+    input clk,              // 50MHz clock
+    input rst_n,            // reset button (active low)
+    output led [8],         // 8 user controllable LEDs
+    input cclk,             // configuration clock, AVR ready when high
+    output spi_miso,        // AVR SPI MISO
+    input spi_ss,           // AVR SPI Slave Select
+    input spi_mosi,         // AVR SPI MOSI
+    input spi_sck,          // AVR SPI Clock
+    output spi_channel [4], // AVR general purpose pins (used by default to select ADC channel)
+    input avr_tx,           // AVR TX (FPGA RX)
+    output avr_rx,          // AVR RX (FPGA TX)
+    input avr_rx_busy,      // AVR RX buffer full
+    output io_led [3][8],   // LEDs on IO Shield
+    output io_seg [8],      // 7-segment LEDs on IO Shield
+    output io_sel [4],      // Digit select on IO Shield
+    input io_button [5],    // 5 buttons on IO Shield
+    input io_dip [3][8]     // DIP switches on IO Shield
+  ) {
+  
+  sig rst;                  // reset signal
+  alu alu;
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    reset_conditioner reset_cond;
+    
+    edge_detector edge_detector (#RISE(1), #FALL(0));
+    
+    .rst(rst) {
+      multi_seven_seg seg;
+      multi_dec_ctr dec_ctr;
+      counter ctr (#SIZE(1), #DIV(24));
+      
+      //alu alu;
+      dff inputa[16];
+      dff inputb[16];
+      dff result[16];
+      
+      fsm state = {IN_A,IN_B,OPERATION,RESULT,AUTO};
+    }
+  }
+  
+  always {
+    reset_cond.in = ~rst_n;   // input raw inverted reset signal
+    rst = reset_cond.out;     // conditioned reset
+    
+    led = c{3b0, io_button};  // connect buttons to LEDs
+    spi_miso = bz;            // not using SPI
+    spi_channel = bzzzz;      // not using flags
+    avr_rx = bz;              // not using serial port
+    
+    edge_detector.in = ctr.value;
+    dec_ctr.inc = edge_detector.out;
+    seg.values = dec_ctr.digits;
+    
+    io_seg = ~seg.seg; // connect segments to the driver
+    io_sel = ~seg.sel; // connect digit select to the driver
+    
+    io_led = io_dip;   // connect the DIP switches to the LEDs
+   
+    alu.a[15:0] = inputa.q;
+    alu.b[15:0] = inputb.q;
+    alu.alufn[5:0] = io_dip[2][5:0];
+    
+    case (state.q) {
+      state.IN_A:
+        inputa.d[7:0] = io_dip[0];  
+        inputa.d[15:8] = io_dip[1]; //alu.a = inputa
+        if  (io_button[4]==1 && state.q== state.IN_A){ //Press the right button to switch states to IN_B
+        state.d = state.IN_B;}
+        
+      state.IN_B:
+              io_led[2][7:6] =2b01;
+        inputb.d[7:0] = io_dip[0];
+        inputb.d[15:8] = io_dip[1];
+        if  (io_button[2]==1 && state.q== state.IN_B ){ //Press the down button to switch states to OPERATION
+        state.d = state.OPERATION;}
+      
+      state.OPERATION:
+              io_led[2][7:6] =2b10;
+      alu.alufn = io_dip[2][5-:6]; // alufn connected to switchs 21:16
+      alu.a = inputa.q;
+      alu.b = inputb.q;
+      result.d = alu.alu;
+      io_led[1] = alu.alu[15-:8];
+      io_led[0] = alu.alu[7-:8];
+        
+      if  (io_button[3]==1&& state.q== state.OPERATION){ //Press the left button to switch states to result
+        state.d = state.RESULT;}
+      state.RESULT:
+              io_led[2][7:6] =2b11;
+      io_led[1] = result.q[15:8];
+      io_led[0] = result.q[7:0];  
+        if  (io_button[0]==1&& state.q== state.RESULT){ // press the up button to switch to IN_A
+        state.d = state.IN_A;}
+      //state.AUTO:
+      
+    }
+    }    
+}
