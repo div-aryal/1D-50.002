@@ -1,5 +1,5 @@
-module boolean (
-    input a[16],
+module boolean ( 
+    input a[16], // defining inputs and outputs of module
     input b[16],
     input alufn[6],
     output out[16]
@@ -8,19 +8,19 @@ module boolean (
   always {
    case(alufn[3:0]) {
     4b0000:
-      out = 0;      //0
+      out = 0;      // Start Case
     4b0110:
-      out = a ^ b;  //xor
+      out = a ^ b;  //XOR Case
     4b1000:
-      out = a & b;  //and
+      out = a & b;  // AND Case
     4b1001:
-      out = a ~^ b; //xnor
+      out = a ~^ b; //XNOR Case
     4b1010:
-      out = a;
+      out = a; // LDR for A
     4b1100:
-      out = b;
+      out = b; // LDR for B
     4b1110:
-      out = a | b;  //or
+      out = a | b;  // OR Case
     default:
       out = 0;
     }
