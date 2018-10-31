@@ -1,9 +1,9 @@
 module compare (
-   input alufn[6],
+   input alufn[6], //import from ALU
    input z,
    input v,
    input n,
-   output out[16]  //only using LSB bit
+   output out[16]  //only using LSB bit output to ALU
   ) {
 
   always {
@@ -17,7 +17,7 @@ module compare (
     2b11:
       out[0] = z | (n ^ v); // a<=b
     default:
-      out[0] = 0; 
+      out[0] = 0; // default to 0
     }
   }
 }
