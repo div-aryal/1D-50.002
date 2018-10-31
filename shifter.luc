@@ -1,8 +1,8 @@
 module shifter (
-    input a[16],
+    input a[16], // defining inputs and outputs
     input b[16],
     input alufn[6],
-    output out[16]
+    output out[16] // output for shifted value
   ) {
 
   always {
@@ -14,9 +14,9 @@ module shifter (
         //right shift signed
         out = a >>> b[2:0];
       2b11:
-        //right shift signed
+        //right shift arithmetic
         out = $signed(a) >>> b[2:0];
-      default:
+      default: //
         out = 0;
     }
   }
