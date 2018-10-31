@@ -1,3 +1,4 @@
+// We use "ST01" and "ST02" to represent the state we are in and "OP" for OPP Code
 module seven_seg (
     input char[4],
     output segs[7]
@@ -5,7 +6,7 @@ module seven_seg (
 
   always {
     case (char) {
-      0: segs = 7b0111111;
+      0: segs = 7b0111111; //digits
       1: segs = 7b0000110;
       2: segs = 7b1011011;
       3: segs = 7b1001111;
@@ -16,7 +17,7 @@ module seven_seg (
       8: segs = 7b1111111;
       9: segs = 7b1100111;
       
-      "z": segs = 7b01000000; //"-"
+      "z": segs = 7b01000000; //alphabets
       "a": segs = 7b1110111;
       "b": segs = 711111100;
       "c": segs = 7b0111001;
